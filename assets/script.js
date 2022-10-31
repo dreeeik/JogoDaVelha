@@ -1,7 +1,8 @@
 const cellElements = document.querySelectorAll(".cell");
 const board = document.querySelector(".board");
-const winningMessageTxt = document.querySelector(".end");
-const winningMessage = document.querySelector(".vencedor");
+const winningMessageTxt = document.querySelector(".winningMessageTxt");
+const winningMessage = document.querySelector(".winningMessage");
+const restartButton = document.querySelector(".reiniciar")
 
 let isCircle;
 
@@ -16,12 +17,17 @@ const winning = [
     [2, 4, 6]
 ];
 const startGame = () =>{
-    for (const cell of cellElements){
-    cell.addEventListener('click', handleClick, {once:true});
-}
     isCircle = false;
 
-    board.classList.add("x");
+    for (const cell of cellElements){
+    cell.classList.remove('circle')
+    cell.classList.remove('x')
+    cell.removeEventListener("click", handleClick);
+    cell.addEventListener('click', handleClick, {once:true});
+}
+
+    HoverClass();
+    winningMessage.classList.remove("winner");
 };
 
 const endGame = (isDraw) =>{
@@ -29,7 +35,7 @@ const endGame = (isDraw) =>{
         winningMessageTxt.innerText = 'Empate!'
     } else {
         winningMessageTxt.innerText = isCircle
-         ? 'Circulo venceu!'
+         ? 'O venceu!'
          : 'X Venceu!';
     }
     
@@ -44,13 +50,16 @@ const checkWin = (currentPlayer) => {
     });
 };
 
+const checkDraw = () =>{
+    return [...cellElements].every(cell =>{
+       return cell.classList.contains('x') || cell.classList.contains("circle");
+    });
+}
+
 const placeMark = (cell,classToAdd) =>{
     cell.classList.add(classToAdd);
 };
-
-const turnos = () => {
-    isCircle = !isCircle;
-
+const HoverClass = () => {
     board.classList.remove('circle');
     board.classList.remove('x');
 
@@ -59,6 +68,11 @@ const turnos = () => {
     }else {
         board.classList.add("x")
     }
+}
+const turnos = () => {
+    isCircle = !isCircle;
+
+    HoverClass();
 };
 
 const handleClick = (e) => {
@@ -68,10 +82,17 @@ const handleClick = (e) => {
     placeMark(cell, classToAdd);
 
     const isWin = checkWin(classToAdd);
-    if (isWin){
-        endGame(false)
-    }
 
-    turnos();
+    const isDraw = checkDraw();
+
+    if (isWin){
+        endGame(false);
+    } else if (isDraw){
+        endGame(true);
+    } else{
+        turnos();
+    }
 };
 startGame();
+
+restartButton.addEventListener("click",startGame)
